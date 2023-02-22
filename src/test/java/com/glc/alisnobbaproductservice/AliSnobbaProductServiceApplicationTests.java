@@ -7,14 +7,28 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.http.MediaType;
-import org.junit.jupiter.api.BeforeEach;
+// import static org.hamcrest.CoreMatchers.is;
+// import static org.mockito.ArgumentMatchers.*;
+// import static org.mockito.BDDMockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+// import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+// import org.hibernate.annotations.UpdateTimestamp;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.boot.context.properties.source.InvalidConfigurationPropertyValueException;
+// import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.json.JacksonTester;
+// import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+// import org.springframework.test.web.servlet.ResultActions;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,8 +36,6 @@ import com.glc.alisnobbaproductservice.Controller.ProductController;
 import com.glc.alisnobbaproductservice.Model.ProductModel;
 import com.glc.alisnobbaproductservice.Repository.IProductRepository;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 @SpringBootTest
 class AliSnobbaProductServiceApplicationTests {
 	@Mock
@@ -34,15 +46,52 @@ class AliSnobbaProductServiceApplicationTests {
 	private JacksonTester<List<ProductModel>> jsonProducts;
 	private JacksonTester<ProductModel> jsonProduct;
 
+	// @Autowired
+    // private ObjectMapper objectMapper;
+
+	// @Autowired
+    // private MockMvc mockMvc;
+
 	@BeforeEach
 	public void setup() {
 		JacksonTester.initFields(this, new ObjectMapper());
 		mvc = MockMvcBuilders.standaloneSetup(productController).build();
 	}
 
+	@Test
+	public void testProductID(){
+		ProductModel productModel = new ProductModel();
+		Long id = 1L;
+		productModel.setId(id);
+		assertEquals(id, productModel.getId());
+	}
 
 	@Test
-	public void canAddProducts() throws Exception{
+	public void builderProductModel(){
+		Long id = 1L;
+		String productName = "Ruby Slippers";
+		String productImage = "Image";
+		Long productPrice = 684750000L;
+		String shortDescription = "An impressive pair of slippers featuring thousands of real rubies.";
+		String longDescription = "Harry Winston has carefully crafted these fantastic shoes.  Each pair boasts a total of 4,600 gemstones including 1,350 carats of premium rubies and 50 carats of diamonds. You’ll be the talk of the town when you wear these slippers (not to mention the target of shoe thieves everywhere).  Harry makes no promise about how comfortable these slippers are though.";
+		ProductModel productModel = ProductModel.builder()
+									.id(id)
+									.productName(productName)
+									.productImage(productImage)
+									.productPrice(productPrice)
+									.shortDescription(shortDescription)
+									.longDescription(longDescription)
+									.build();
+		assertEquals(id, productModel.getId());
+		assertEquals(productName, productModel.getProductName());
+		assertEquals(productImage, productModel.getProductImage());
+		assertEquals(productPrice, productModel.getProductPrice());
+		assertEquals(shortDescription, productModel.getShortDescription());
+		assertEquals(longDescription, productModel.getLongDescription());
+	}
+
+	@Test
+	public void canGetAndSetData() throws Exception{
 		String productName = "Ruby Slippers";
 		String shortDescription = "An impressive pair of slippers featuring thousands of real rubies.";
 		String longDescription = "Harry Winston has carefully crafted these fantastic shoes.  Each pair boasts a total of 4,600 gemstones including 1,350 carats of premium rubies and 50 carats of diamonds. You’ll be the talk of the town when you wear these slippers (not to mention the target of shoe thieves everywhere).  Harry makes no promise about how comfortable these slippers are though.";
@@ -79,6 +128,11 @@ class AliSnobbaProductServiceApplicationTests {
 		when(productRepository.findById(1L)).thenReturn(Optional.of(productModel1));
 		mvc.perform(get("/product/1").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(jsonProduct.write(productModel1).getJson()));
 	}
-	
+
+	@Test
+	public void canPostProduct() throws Exception{
+		ProductModel productModel1 = new ProductModel("Ruby Slippers","An impressive pair of slippers featuring thousands of real rubies.","Harry Winston has carefully crafted these fantastic shoes.  Each pair boasts a total of 4,600 gemstones including 1,350 carats of premium rubies and 50 carats of diamonds. You’ll be the talk of the town when you wear these slippers (not to mention the target of shoe thieves everywhere).  Harry makes no promise about how comfortable these slippers are though.","https://raw.githubusercontent.com/jeff-lent/Alisnobba/main/Capstone/ActualRubyRubySlippers.jpg",684750000L);
+		mvc.perform(post("/product/add").contentType(MediaType.APPLICATION_JSON).content(jsonProduct.write(productModel1).getJson())).andExpect(status().isOk());
+	}
 	
 }
