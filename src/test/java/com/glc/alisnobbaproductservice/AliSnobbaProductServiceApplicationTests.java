@@ -162,8 +162,6 @@ class AliSnobbaProductServiceApplicationTests {
 	when(productRepository.findById(1L)).thenReturn(Optional.of(productModel1));
 	mvc.perform(get("/product/1").contentType(MediaType.APPLICATION_JSON)
 	.content(jsonProduct.write(productModel1).getJson())).andExpect(status().isOk());
-	// .andExpect(status().isOk())
-	// .content(jsonProduct.write(productModel1).getJson());
 	}
 
 
