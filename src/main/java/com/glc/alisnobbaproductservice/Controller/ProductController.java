@@ -1,8 +1,10 @@
 package com.glc.alisnobbaproductservice.Controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +35,14 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ProductModel findById(@PathVariable Long id){
-        return productRepository.findById(id).orElse(null);
+    public ResponseEntity<ProductModel> findById(@PathVariable Long id){
+        Optional<ProductModel> p = productRepository.findById(id);
+        if(p.isPresent()){
+            productRepository.findById(id);
+            return ResponseEntity.ok().build();
+        }
+        else{
+            return ResponseEntity.notFound().build();
+        }
     }
 }
